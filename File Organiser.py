@@ -19,7 +19,7 @@ Categories= config["Categories"]
 Ignore=config["Ignore"]
 
 class Handler(FileSystemEventHandler):
-    def on_created(self, event): # Watchdog has built in special method name(idk what that means search it up future me)
+    def on_created(self, event): # Watchdog has built in special method name thats triggered whenever a file/directory is created
         
         print("File Created: ",event.src_path) # src_path simply tells the path where the file was created
         file_path=event.src_path  # Takes the file path from source path above
@@ -76,4 +76,5 @@ try:
 except KeyboardInterrupt:
     File_Read.stop()
 
-File_Read.join( ) # idk whatthis does, think it waits until the observer thread stops to ensure that the program doesnt exit while the observer is still running, which can cause problems
+
+File_Read.join( ) #It waits until the observer thread stops to ensure that the program doesnt exit while the observer is still running, which can cause problems
