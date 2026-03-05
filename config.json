@@ -1,0 +1,16 @@
+{   
+    
+    "Categories": {
+
+        "Images": [".jpg",".png",".jpeg", ".jfif",".webp"],
+        "Docs": [".pdf",".txt",".docx",".doc",".pptx"],
+        "Torrents": [".torrent"],
+        "Installers": [".exe",".msi"],
+        "ZIP files": [".zip",".rar",".7z"],
+        "Vids": [".mp4",".mkv",".webm"],
+        "Audio": [".mp3",".wav",".flac",".m4a"],
+        "3D Prints": [".stl"]
+    },
+    "Ignore": [".crdownload",".tmp",".part",".download",".partial"],
+    "Path": "Enter Your Folder Path(and use double backslashes instead of single ones)"
+}
