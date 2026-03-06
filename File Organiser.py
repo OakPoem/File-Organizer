@@ -7,22 +7,30 @@ import os
 
 import json
 
-with open("config.json","r") as f: # opens the config file from the Current working directory only; in read mode(hence "r"), and assigns the file to a variable 'f' and closes file automatically
+script_dir=os.path.dirname(os.path.abspath(__file__)) # takes the full file path of the script file(File Organiser.py) and takes its directory(folder) name.
+config_path=os.path.join(script_dir,"config.json") # Then it tells the program where config.json is located
+
+# The above setup is required as for a script to work properly, python is executed from the main directory, and it searched for a config.json file in that directory, when in reality the file exisits here, so it gives a 'FileNotFound' type of error
+
+
+with open(config_path,"r") as f: # opens the config file from the Current working directory only; in read mode(hence "r"), and assigns the file to a variable 'f' and closes file automatically
      config= json.load(f)
+
+
 
     # home_dir=os.path.expanduser('~') # outputs the User's HOME directory(C:\Users) equivalent
     # path=os.path.join(home_dir,"Downloads") # Folder to Monitor
 
 # Dictionary for extension names and the folders they should go to
-path=config["path"]
+path=config["Path"]
 Categories= config["Categories"]
 Ignore=config["Ignore"]
 
 class Handler(FileSystemEventHandler):
-    def on_created(self, event): # Watchdog has built in special method name thats triggered whenever a file/directory is created
+    def process(self, file_path): # Watchdog has built in special method name(idk what that means search it up future me)
         
-        print("File Created: ",event.src_path) # src_path simply tells the path where the file was created
-        file_path=event.src_path  # Takes the file path from source path above
+        print("Processing", file_path)
+        
         file_name=os.path.basename(file_path) # takes the name of file created in the file path(Ex: abcd.text is full name)
         extension= os.path.splitext(file_name)[1] # splits the name into 2 parts - abcd and .txt, then the [1] selects the .txt part of the name
         extension=extension.lower() # for consistency in handling extension names for different cases(uppercase,lowercase,etc)
@@ -35,7 +43,7 @@ class Handler(FileSystemEventHandler):
         # so for the below code, it initializes 2 variables-category and extensions, and category is assigned to the keys, while extensions is assigned to values in the dict.
         # Like for the 1st iteration, it basically does: (category=)Images: (extensions=)[".jpg",etc.]
 
-        if event.is_directory: # 
+        if os.path.isdir(file_path): # if File is already inside the category sub folder(to prevent infinite loop)
              return
 
         if extension in Ignore: # if the file is a temproary extension(like a file currently being donwloaded), it will be ignored and the program will stop
@@ -43,18 +51,26 @@ class Handler(FileSystemEventHandler):
         
         parent_folder=os.path.dirname(file_path) # Assigns the folder the file is in 
         parent_folder=os.path.normpath(parent_folder) # Normalizes the parent folder to account for case differences, slashes, etc.
+        watch_path=os.path.normpath(path)
         
-        if parent_folder != path: # if file is not already in Downloads, strop program. This stops duplicate files which were already categorized from being categorized again upon any sort of modification within those folders.
+        if parent_folder != watch_path: # if file is not already in Downloads, strop program. This stops duplicate files which were already categorized from being categorized again upon any sort of modification within those folders.
              return
         
         for category,extensions in Categories.items():
 
-            destination_path= os.path.join(path,category) # This defines the destination folder in accordance to each key value of the dict
+            destination_path= os.path.join(watch_path,category) # This defines the destination folder in accordance to each key value of the dict
              
             if extension in extensions:
                 os.makedirs(destination_path,exist_ok=True) # Checks whether the destination folder even exists or not and creates one if it doesnt exist
                 shutil.move(file_path,destination_path)
                 return
+    
+    def on_created(self,event):
+        self.process(event.src_path)
+    
+    def on_moved(self,event):
+        self.process(event.dest_path)
+
             
     
 File_Read=Observer() # initializes instance of observer to monitor directory with a variable called File_Read
@@ -76,5 +92,4 @@ try:
 except KeyboardInterrupt:
     File_Read.stop()
 
-
-File_Read.join( ) #It waits until the observer thread stops to ensure that the program doesnt exit while the observer is still running, which can cause problems
+File_Read.join( ) # idk whatthis does, think it waits until the observer thread stops to ensure that the program doesnt exit while the observer is still running, which can cause problems
